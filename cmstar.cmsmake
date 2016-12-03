@@ -1,0 +1,113 @@
+#
+#
+#         Name: CMSTAR CMSMAKE
+#         Date: 2016-Apr-24 +/-
+#               This file is part of the CMSTAR package
+#               but requires CMS Make and VMARC for full operation.
+#
+
+all:                \
+                cmstar.filelist \
+                cmstar.readme \
+                cmstar.license \
+                tar.exec \
+                tar.rexx \
+                tarindex.rexx \
+                tarreadc.rexx \
+                tarpunch.rexx \
+                tartake.rexx \
+                tarlist.exec \
+                proftlst.xedit \
+                executar.xedit \
+                tar.helpcms \
+                tarlist.helpcms \
+                vmgroup.helprexx \
+                rxvmgroup.assemble \
+                a2e.rexx \
+                e2a.rexx \
+                maketext.rexx \
+                cmstar.cmsmake
+
+
+cmstar.filelist:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+cmstar.readme:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+cmstar.license:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tar.exec:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tar.rexx:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tarindex.rexx:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tarreadc.rexx:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tarpunch.rexx:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tartake.rexx:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tarlist.exec:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+proftlst.xedit:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+executar.xedit:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+rxvmgroup.helpcms:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tar.helpcms:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+tarlist.helpcms:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+rxvmgroup.assemble:
+        wget http://ltroth1.casita.net/pub/cmstar/$@
+
+rxvmgroup.module:  rxvmgroup.assemble
+        @copyfile rxvmgroup assemble a = = = ( olddate replace recfm f lrecl 80
+        GLOBAL MACLIB DMSGPI DMSOM
+        HLASM RXVMGROUP
+        LOAD RXVMGROUP (RLDSAVE
+        GENMOD RXVMGROUP
+        ERASE RXVMGROUP TEXT
+        ERASE RXVMGROUP LISTING
+        ERASE LOAD MAP
+
+### package files ###
+
+archives:  cmstar.vmarc  cmstar.tar
+
+cmstar.vmarc:  cmstar.filelist rxvmgroup.module
+        @rm -f cmstar.vmarc
+        @cms ' pipe < cmstar filelist \
+                | nlocate 1.1 /*/ \
+                | spec /vmarc pack/ nw w 1 nw w 2 nw /a/ nw \
+                    /cmstar vmarc a ( append/ nw \
+                | cms | console '
+        @VMARC PACK RXVMGROUP MODULE  * CMSTAR VMARC A ( APPEND
+
+cmstar.vmarcuue:  cmstar.vmarc
+        uuencode -m $< < $< > $@
+
+cmstar.tar:  cmstar.filelist
+        @rm -f cmstar.tar
+        tar cvf cmstar.tar (include cmstar
+
+cmstar.taruue:  cmstar.tar
+        uuencode -m $< < $< > $@
+
+

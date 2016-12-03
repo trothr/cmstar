@@ -1,0 +1,43 @@
+* Copyright © 2016, Richard M. Troth, all rights reserved.   <plaintext>
+*
+*         Name: CMSTAR FILELIST
+*         Date: 2016-Apr-21 (Thu)
+*               This is the package definition for "CMS TAR".
+*
+      CMSTAR   FILELIST *  -- this file
+      CMSTAR   README   *  -- do what the name says
+      CMSTAR   LICENSE  *  -- simplified legal stuff
+*
+* CMS TAR:
+      TAR      EXEC     *  -- the 'tar' command (wraps the pipeline)
+      TAR      REXX     *  -- 'tar' as a CMS Pipelines stage
+      TARINDEX REXX     *  --
+      TARREADC REXX     *  --
+      TARPUNCH REXX     *  --
+*     TARTAPER REXX     *  --
+*     TARTAPEW REXX     *  --
+      TARTAKE  REXX     *  --
+*
+*     RXVMGROUP MODULE  *  -- a vmgroup() function for REXX
+      RXVMGROUP ASSEMBLE * -- source to the vmgroup() function
+      VMGROUP  HELPREXX *  -- help file for the vmgroup() function
+*
+* support stages for plaintext conversion
+      A2E      REXX     *  --
+      E2A      REXX     *  --
+      MAKETEXT REXX     *  --
+*
+      TAR      HELPCMS  *  -- brief help
+*
+* TARLIST:
+      TARLIST  EXEC     *  -- the 'tarlist' command
+      PROFTLST XEDIT    *  -- macro to present the list view
+      EXECUTAR XEDIT    *  -- macro for commands from list view
+      TARLIST  HELPCMS  *  -- brief help
+*
+* supplemental
+      CMSTAR   CMSMAKE  *  -- simple 'make' rules for [re]packaging these files
+* make -f cmstar rxvmgroup.module
+* make -f cmstar archives
+*
+*

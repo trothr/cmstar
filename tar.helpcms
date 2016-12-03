@@ -1,0 +1,103 @@
+.cm                                                                                                                                *
+.cm
+.cm       Name: TAR HELPCMS
+.cm       Date: 2016-Apr-24 (Sunday) and prior
+.cm
+.cm This file was originally created from  file "TAR -HLPCMS"
+.cm using version 1989-09-06 of the UCSF "HELPCONV" command.
+.cm Original author of this help file: Sean Starke, then at Rice Univ.
+.cm
+.cs 1 on
+.cm ¢|TAR EXEC¢%
+
+ Use CMS TAR to store many files in an archive file on tape or disk.
+ CMS TAR can read UNIX 'tar' archives
+ and archives created with CMS TAR can be read by UNIX 'tar'.
+.cs 1 off
+
+.cs 2 on
+ The format of the TAR command is:
+ +------------+-------------------------------------------------------------+
+ |            |                                                             |
+ |  tar       | command [tarfile] [pattern] [(options...]                   |
+ |            |                                                             |
+ +------------+-------------------------------------------------------------+
+.cs 2 off
+
+.cs 3 on
+¢|where:¢%
+
+¢|command¢%  is one of "c", "x", or "t", optionally with "v"
+           and "f", "s", or 0..7, signifying:
+
+           c : create a new archive
+           x : extract files from an archive
+           t : list the files in an archive
+           ("c", "x", and "t" are mutually exclusive)
+
+           v : verbose
+
+           f : next argument is a disk resident archive
+           s : next argument is a spool file or remote recipient
+           01234567 : tape drive number, default is TAP1 (181)
+           ("f", "s", and numerics are mutually exclusive)
+
+¢|compressors¢%  is one of "Z", "z", "j", or "J"
+
+ Note: compressors are external to CMS TAR.
+
+¢|tarfile¢% is the filename of the disk resident archive, having a filetype
+           of TAR, if F was specified in the command. This can also be the
+           spoolid of the file when extracting a spool TAR file, or a target
+           user@node when creating a spool TAR file.
+
+           The recommended filetype is "TAR".
+           You can override the filetype using Unix/Linux/Windows style
+           filename.filetype notation, for example:
+
+                tar tf thefile.cmstar
+
+¢|pattern¢%  specifies what files to tar/untar.
+
+           CREATING AN ARCHIVE
+           When creating an archive, this pattern must be specified
+           in the form 'fn ft fm', like when using the LISTFILE command.
+           In addition to '*' and '%', periods (.) can be used as wilcards
+           (like in UNIX) so that if you specify simply '.' as the pattern,
+           then all files on your 'A' disk will be archived. (curr directory)
+           If the pattern omitted, only files specified with the INCLUDE option
+           will be archived.
+
+           EXTRACTING AN ARCHIVE
+           If you want to extract only one file,  put it's name (exactly as it
+           appears with the LIST command) here. If this option is omitted,
+           all files will be extracted from the archive.
+.cs 3 off
+
+.cs 4 on
+¢|Options:¢%
+
+¢|INCLUDE fn
+           specifies a FILELIST file listing files to be included in an
+           archive being built. When creating an archive using an INCLUDE file,
+           the name of each file as it will appear in the archive may follow
+           fn ft fm in the FILELIST, overriding the standard "fn.ft"
+           concatenation.
+
+           The filetype of an include file is FILELIST and cannot be changed.
+.cs 4 off
+
+.cs 6 on
+¢|Return Codes:¢%
+
+ Return codes are set by CMS Pipelines and other support programs.
+.cs 6 off
+
+.cs 7 on
+See the following related topics:
+
+
+cms tarlist             'tarlist' to browse an archive somewhat like 'rdrlist' or 'filelist'
+cms curl                a CMS work-alike of the Unix/Linux 'curl' utility
+
+.cs 7 off

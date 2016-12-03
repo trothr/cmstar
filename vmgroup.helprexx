@@ -1,0 +1,56 @@
+.cm                                                                                                                                *
+.cm
+.cm       Name: VMGROUP HELPREXX, formerly RXVMGROUP HELPCMS
+.cm       Date: 2016-Apr-24 (Sunday) and prior, originally 1992-Jan-30
+.cm
+.cm
+.cs 1 on
+.cm ¢|REXX VMGROUP function¢%
+
+ Use the vmgroup() function to get the ACI group of your ID, or
+ with sufficient privileges, another ID.
+.cs 1 off
+
+.cs 2 on
+ The syntax for the vmgroup() function is:
+ +--------------------------------------------------------------------------+
+ |                                                                          |
+ |    mygroup = vmgroup(userid())                                           |
+ |                                                                          |
+ +--------------------------------------------------------------------------+
+.cs 2 off
+
+.cs 3 on
+¢|example usage:¢%
+
+      /* REXX */
+      Say "My ACI group is" vmgroup(userid())
+.cs 3 off
+
+.cs 4 on
+ REXX function vmgroup() returns the ACI group name for the
+ virtual machine specified. It must be called as a function,
+ not as a subroutine, not as a command. If it is invoked from
+ the CMS command line, an instructional message is displayed.
+.cs 4 off
+
+.cs 5 on
+¢|notes:¢%
+
+ Assembler source is maintained at Casita.Net.
+ Contact the author at <rmt@casita.net> if you have updates or fixes.
+.cs 5 off
+
+.cs 6 on
+¢|Return Codes:¢%
+
+ Return codes are set by CMS Pipelines and other support programs.
+.cs 6 off
+
+.cs 7 on
+See the following related topics:
+
+
+cms tar                 'tar' to create, extract, or list a TAR-format archive; uses vmgroup()
+
+.cs 7 off

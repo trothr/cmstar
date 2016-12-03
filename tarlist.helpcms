@@ -1,0 +1,51 @@
+.cm                                                                                                                                *
+.cm
+.cm       Name: TARLIST HELPCMS
+.cm       Date: 2016-Apr-24 (Sunday) and prior
+.cm
+.cm
+.cs 1 on
+.cm ¢|TARLIST EXEC¢%
+
+ Use the TARLIST command to browse a TAR file similar to FILELIST or RDRLIST.
+.cs 1 off
+
+.cs 2 on
+ The format of the TARLIST command is:
+ +------------+-------------------------------------------------------------+
+ |            |                                                             |
+ |  TARLIST   |  tar-file                                                   |
+ |            |                                                             |
+ +------------+-------------------------------------------------------------+
+
+.cs 2 off
+
+.cs 3 on
+¢|Notes:¢%
+
+ TARLIST is not well developed.
+ The task of writing a utility from scratch
+ that functions like FILELIST proved to be overwhelming.
+ PF9 and PF11 work as listed, but don't expect anything else.
+.cs 3 off
+
+.cs 4 on
+¢|Options:¢%
+
+ The TARLIST command has no options.
+.cs 4 off
+
+.cs 6 on
+¢|Return Codes:¢%
+
+ Return codes are set by CMS Pipelines and other support programs.
+.cs 6 off
+
+.cs 7 on
+See the following related topics:
+
+
+cms tar                 'tar' to create, extract, or list a TAR-format archive
+cms curl                a CMS work-alike of the Unix/Linux 'curl' utility
+
+.cs 7 off

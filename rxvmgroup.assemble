@@ -1,0 +1,133 @@
+* ------------------------------------------------------------------- * RXV00010
+*                                                                     * RXV00020
+*         Name: RXVMGROUP ASSEMBLE                                    * RXV00030
+*               REXX function vmgroup() returns the security group    * RXV00040
+*               name string for the virtual machine specified         * RXV00050
+*       Author: Rick Troth, Houston, Texas, USA                       * RXV00060
+*         Date: 1992-Jan-29                                           * RXV00070
+*                                                                     * RXV00080
+*   build with:                                                       * RXV00090
+*                                                                     * RXV00100
+*               GLOBAL MACLIB DMSGPI DMSOM                            * RXV00110
+*               HASM RXVMGROUP                                        * RXV00120
+*               LOAD RXVMGROUP (RLDSAVE                               * RXV00130
+*               GENMOD RXVMGROUP                                      * RXV00140
+*                                                                     * RXV00150
+*      example:                                                       * RXV00160
+*                                                                     * RXV00170
+*               /* REXX */                                            * RXV00180
+*               Say "My ACI group is" vmgroup(userid())               * RXV00190
+*                                                                     * RXV00200
+*         Note: thanks to Arty, Ken, Scott, whos code I dissected,    * RXV00210
+*               and to whoever-it-was in IBM that wrote the example   * RXV00220
+*               in the system product interpreter reference.          * RXV00230
+*               Gosh it feels good when simple things like this work. * RXV00240
+*                                                                     * RXV00250
+* ------------------------------------------------------------------- * RXV00260
+*                                                                       RXV00270
+RXVMGROU CSECT ,                                                        RXV00280
+RXVMGROU AMODE ANY                                                      RXV00290
+RXVMGROU RMODE ANY                                                      RXV00300
+*                                                                       RXV00310
+         USING *,R12                   R12 is preset by CMS; R15 same   RXV00320
+         B     @HDR                                                     RXV00330
+         DC    C' RXVMGROUP &SYSDATE &SYSTIME '                         RXV00340
+*                                                                       RXV00350
+*HDR     DS    0H                                                       RXV00360
+@HDR     DS    0D       go for it!  waste up to six whole bytes!        RXV00370
+*                                                                       RXV00380
+         STM   R14,R12,12(R13)         save registers (yes please)      RXV00390
+*        BALR  R12,R0                  load base register (NO! DON'T!)  RXV00400
+*        USING *,R12                   establish addressability         RXV00410
+*                                      (avoid BALR at all costs)        RXV00420
+*                                                                       RXV00430
+         CLM   R1,B'1000',=X'05'       called by the interpreter?       RXV00440
+         BNE   HELP                    if not, then give some help      RXV00450
+*                                                                       RXV00460
+         LTR   R0,R0                   called as a subroutine?          RXV00470
+         BM    INCORR                  yes, so incorrect call           RXV00480
+*                                                                       RXV00490
+         LR    R2,R0                   Save addr of Ext Plist           RXV00500
+         L     R2,16(R2)               Addr of addr/len list            RXV00510
+         LR    R3,R0                   Save addr of Ext Plist           RXV00520
+         L     R3,20(R3)               Addr of SYSFUNRT                 RXV00530
+*                                                                       RXV00540
+         CLI   0(R2),X'FF'             any arguments?                   RXV00550
+         BE    INCORR                  if not, then return error        RXV00560
+         LM    R5,R6,0(R2)             else load arg one and length     RXV00570
+* we could verify only just one argument,  but why bother?              RXV00580
+         C     R6,=F'8'                is length greater than eight?    RXV00590
+         BH    INCORR                  yes, so incorrect call           RXV00600
+*                                                                       RXV00610
+*        LA    R0,EVCTLEN              which is best, R0 or R1?         RXV00620
+*        LA    R1,EVCTLEN              should I set both?               RXV00630
+*        DMSFREE DWORDS=(0),MIN=(1)    get some core                    RXV00640
+         CMSSTOR OBTAIN,DWORDS=EVCTLEN get some XA core                 RXV00650
+         USING EVALBLOK,R1             R1 is set by DMSFREE/CMSSTOR     RXV00660
+         ST    R1,0(R3)                store address of EVALBLOK        RXV00670
+*                                                                       RXV00680
+         MVC   USER(8),0(R5)           fill-in the user field           RXV00690
+         LA    R5,USER                 point to that field ...          RXV00700
+         ALR   R5,R6                   then skip to end of string       RXV00710
+         MVC   0(16,R5),=C' '          pad with blanks, clearing group  RXV00720
+*                                                                       RXV00730
+         LA    R4,USER                 address of user/group structure  RXV00740
+         LA    R6,0                    function code zero               RXV00750
+         DIAG  R4,R6,X'00A0'           perform the DIAG A0 call to CP   RXV00760
+*        BNZ   INCORR                  nah ... just return blanks       RXV00770
+*                                                                       RXV00780
+         LA    R8,0                    (this could all be done better)  RXV00790
+         ST    R8,EVNEXT               zero-out EVNEXT (1st res word)   RXV00800
+         LA    R8,EVCTLEN                                               RXV00810
+         ST    R8,EVSIZE               store size of EVALBLOK           RXV00820
+         LA    R8,0                                                     RXV00830
+         ST    R8,EVBPAD2              zero-out second reserved word    RXV00840
+*                                                                       RXV00850
+         LA    R8,GROUP+8              point to end of group string     RXV00860
+         LA    R7,GROUP                point to start of group string   RXV00870
+@LOOP    DS    0H                                                       RXV00880
+         CR    R7,R8                   at the start yet?                RXV00890
+         BE    @ELOOP                  if so,  then exit this loop      RXV00900
+         S     R8,=F'1'                step backward thru the string    RXV00910
+         CLI   0(R8),C' '              look for trailing blanks         RXV00920
+         BE    @LOOP                   skip back past blanks            RXV00930
+         A     R8,=F'1'                step forward one byte            RXV00940
+@ELOOP   DS    0H                                                       RXV00950
+         SR    R8,R7                   R8 = R8 - R7                     RXV00960
+*        LA    R8,8                    (previously ret'd fixed length)  RXV00970
+         ST    R8,EVLEN                store length of string returned  RXV00980
+*                                                                       RXV00990
+         SR    R15,R15                 Set return code = 0              RXV01000
+*        LM                                                             RXV01010
+         BR    R14                     Return                           RXV01020
+*                                                                       RXV01030
+INCORR   DS    0H                                                       RXV01040
+         LA    R15,1                   Set return code = 1              RXV01050
+*        LM    ,                                                        RXV01060
+         BR    R14                     Return                           RXV01070
+*                                                                       RXV01080
+HELP     DS    0H                                                       RXV01090
+         LINEDIT TEXT='RXVMGROUP - REXX function vmgroup() returns th',+RXV01100
+               DOT=NO,COMP=NO                                           RXV01110
+         LINEDIT TEXT='e group name of the virtual machine specified.',+RXV01120
+               DOT=NO,COMP=NO                                           RXV01130
+         SR    R15,R15               Set return code = 0                RXV01140
+*        LM    ,                                                        RXV01150
+         BR    R14                   Return                             RXV01160
+*                                                                       RXV01170
+         LTORG ,                                                        RXV01180
+*                                                                       RXV01190
+EVALBLOK DSECT ,                                                        RXV01200
+EVNEXT   DS    F                     next? next what? next EVALBLOK?    RXV01210
+EVSIZE   DS    F                     size of the block in d-words       RXV01220
+USER     DS    0CL8                  user string overlaps EVLEN & pad   RXV01230
+EVLEN    DS    F                     length of returned string in bytes RXV01240
+EVBPAD2  DS    F                     should be zero                     RXV01250
+GROUP    DS    0CL8                  group field overlaps EVDATA        RXV01260
+EVDATA   DS    CL8                                                      RXV01270
+         DS    CL8                   extra                              RXV01280
+EVCTLEN  EQU   (*-EVALBLOK)/8                                           RXV01290
+*                                                                       RXV01300
+         REGEQU ,                                                       RXV01310
+*                                                                       RXV01320
+         END   ,                                                        RXV01330
