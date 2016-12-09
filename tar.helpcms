@@ -11,8 +11,7 @@
 .cm ¢|TAR EXEC¢%
 
  Use CMS TAR to store many files in an archive file on tape or disk.
- CMS TAR can read UNIX 'tar' archives
- and archives created with CMS TAR can be read by UNIX 'tar'.
+ CMS TAR can read and write Unix 'tar' archives.
 .cs 1 off
 
 .cs 2 on
@@ -63,7 +62,7 @@
            When creating an archive, this pattern must be specified
            in the form 'fn ft fm', like when using the LISTFILE command.
            In addition to '*' and '%', periods (.) can be used as wilcards
-           (like in UNIX) so that if you specify simply '.' as the pattern,
+           (like in Unix) so that if you specify simply '.' as the pattern,
            then all files on your 'A' disk will be archived. (curr directory)
            If the pattern omitted, only files specified with the INCLUDE option
            will be archived.
