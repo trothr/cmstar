@@ -1,12 +1,23 @@
 /*
  *        Name: TARLIST EXEC
- *              rather like FILELIST,  but for TAR archives
+ *              something like FILELIST or RDRLIST but for TAR archives
  *              Copyright 1992, Richard M. Troth
  */
 
 Parse Arg fn ft fm args '(' opts ')' rest
 If fn = "" Then fn = "TAP1"
-'XEDIT' fn 'TARLIST A0 (WIDTH 240 PROFILE PROFTLST)' ,
+
+/* if tarfile is a URL then pass it as an option */
+If POS("://",fn) > 0 Then Do
+  tarfile = fn
+  Address "COMMAND" 'GLOBALV SELECT TARLIST PUT TARFILE'
+  fn = "*TARFILE"
+End
+
+/* now drive XEDIT with the TARLIST macro */
+'XEDIT' Userid() 'TARLIST A0 (WIDTH 240 PROFILE PROFTLST)' ,
         fn ft fm args '(' opts ')' rest
+
 Exit rc
+
 

@@ -19,7 +19,7 @@ tar.uid = 1
 tar.gid = 1
 
 Parse Arg cmd args '(' opts ')' .
-Upper cmd opts
+Upper cmd
 Parse Source . . . . . arg0 .
 argo = arg0 || ':'
 
@@ -36,7 +36,6 @@ skip = 0
 peek = 0
 once = 0
 replace = 0
-
 
 Do While cmd ^= ""
     Parse Var cmd 1 c 2 cmd
@@ -113,31 +112,39 @@ Do While cmd ^= ""
 If tf = "" Then tf = "TAP1"
 If td = "" Then td = "T"
 
-Do While opts ^= ""
-    Parse Var opts op opts
-    Select  /*  op  */
-        When Abbrev("TARLIST",op,4)     Then tarlist = 1
-        When Abbrev("NOTARLIST",op,3)   Then tarlist = 0
-        When Abbrev("INCLUDE",op,3)     Then Parse Var opts include opts
-        When Abbrev("SKIP",op,1)        Then Parse Var opts skip opts
-        When Abbrev("PEEK",op,2)        Then Do; peek = 1; once = 1; End
-        When Abbrev("ONCE",op,1)        Then once = 1
-        When Abbrev("VERBOSE",op,1)     Then verbose = 1
-        When Abbrev("TERSE",op,5)       Then verbose = 0
-        When Abbrev("MODTIME",op,1)     Then modtime = 1
-        When Abbrev("NOMODTIME",op,3)   Then modtime = 0
-        When Abbrev("PROMPT",op,2)      Then prompt = 1
-        When Abbrev("NOPROMPT",op,3)    Then prompt = 0
-        When Abbrev("REPLACE",op,3)     Then replace = 1
-        When Abbrev("NOREPLACE",op,3)   Then replace = 0
-        Otherwise Do
-            Address "COMMAND" 'XMITMSG 3 OP (ERRMSG'
-/*          Say argo "unrecognized option" op                         */
-            Exit 24
-            End  /*  Otherwise  Do  */
-        End  /*  Select  op  */
-    End  /*  Do  While  */
+If Left(tf,1) = "*" Then Do
+  Address "COMMAND" 'GLOBALV SELECT TARLIST GET TARFILE'
+  If rc = 0 & tarfile ^= "" Then tf = tarfile
+End
 
+/* if tarfile is a URL then handle it like a spool file */
+If POS("://",tf) > 0 Then td = 'S'
+
+Do While opts ^= ""
+  Parse Var opts op opts
+  Upper op
+  Select /* op */
+    When Abbrev("TARLIST",op,4)     Then tarlist = 1
+    When Abbrev("NOTARLIST",op,3)   Then tarlist = 0
+    When Abbrev("INCLUDE",op,3)     Then Parse Var opts include opts
+    When Abbrev("SKIP",op,1)        Then Parse Var opts skip opts
+    When Abbrev("PEEK",op,2)        Then Do; peek = 1; once = 1; End
+    When Abbrev("ONCE",op,1)        Then once = 1
+    When Abbrev("VERBOSE",op,1)     Then verbose = 1
+    When Abbrev("TERSE",op,5)       Then verbose = 0
+    When Abbrev("MODTIME",op,1)     Then modtime = 1
+    When Abbrev("NOMODTIME",op,3)   Then modtime = 0
+    When Abbrev("PROMPT",op,2)      Then prompt = 1
+    When Abbrev("NOPROMPT",op,3)    Then prompt = 0
+    When Abbrev("REPLACE",op,3)     Then replace = 1
+    When Abbrev("NOREPLACE",op,3)   Then replace = 0
+    Otherwise Do
+      Address "COMMAND" 'XMITMSG 3 OP (ERRMSG'
+/*    Say argo "unrecognized option" op                               */
+      Exit 24
+    End /* Otherwise Do */
+  End /* Select op */
+End /* Do While */
 
 Select  /*  tc  */
 

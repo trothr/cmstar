@@ -17,6 +17,7 @@
 *     TARTAPER REXX     *  --
 *     TARTAPEW REXX     *  --
       TARTAKE  REXX     *  --
+      CURL     REXX     *  -- web retrieval helper stage
 *
 *     RXVMGROUP MODULE  *  -- a vmgroup() function for REXX
       RXVMGROUP ASSEMBLE * -- source to the vmgroup() function
