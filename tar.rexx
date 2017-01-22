@@ -6,7 +6,7 @@
  *      Author: Rick Troth, Houston, Texas, USA
  */
 
-vrm = "2.4.0"
+vrm = "2.4.1"
 Numeric Digits 16
 
 /* ASCII non-printables */
@@ -18,8 +18,6 @@ e_nprint = '0001020304'x
 tar.uid = 1
 tar.gid = 1
 
-Parse Arg cmd args '(' opts ')' .
-Upper cmd
 Parse Source . . . . . arg0 .
 argo = arg0 || ':'
 
@@ -36,6 +34,30 @@ skip = 0
 peek = 0
 once = 0
 replace = 0
+
+/* parse command-line options */
+Parse Arg args "(" opts ")" .
+
+Parse Var args arg1 .
+Do While Left(arg1,2) = "--"
+  Parse Var args . args
+  Select
+    When Abbrev("--version",arg1,5) Then Do
+/*    Say "CMS TAR - Version" vrm "(piped)"    */
+/*    Say "tar (CMS tar)" vrm    */
+      Say "CMS TAR" vrm "(piped)"
+      Exit
+    End
+    Otherwise Do
+      Address "COMMAND" 'XMITMSG 3 ARG1 (ERRMSG'
+      Exit 24
+    End
+  End /* Select */
+  Parse Var args arg1 .
+End
+
+Parse Var args cmd args
+Upper cmd
 
 Do While cmd ^= ""
     Parse Var cmd 1 c 2 cmd
@@ -96,16 +118,16 @@ Do While cmd ^= ""
             td = 'T'
             End  /*  When  Do  */
         When c = 'V' Then Do
-            verbose = 1
-            Say "CMS TAR - Version" vrm "(piped)"
-            End  /*  When  Do  */
+          verbose = 1
+          Say "CMS TAR - Version" vrm "(piped)"
+        End  /*  When  Do  */
         When c = 'M' Then modtime = 0
         When c = 'W' Then prompt = 1
         Otherwise Do
-            Address "COMMAND" 'XMITMSG 3 C (ERRMSG'
-            Say argo "unrecognized command token" c
-            Exit 24
-            End  /*  Otherwise  Do  */
+          Address "COMMAND" 'XMITMSG 3 C (ERRMSG'
+          Say argo "unrecognized command token" c
+          Exit 24
+        End  /*  Otherwise  Do  */
         End  /*  Select  c  */
     End
 
@@ -140,7 +162,6 @@ Do While opts ^= ""
     When Abbrev("NOREPLACE",op,3)   Then replace = 0
     Otherwise Do
       Address "COMMAND" 'XMITMSG 3 OP (ERRMSG'
-/*    Say argo "unrecognized option" op                               */
       Exit 24
     End /* Otherwise Do */
   End /* Select op */
