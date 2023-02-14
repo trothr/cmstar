@@ -8,10 +8,11 @@
 .cm Original author of this help file: Sean Starke, then at Rice Univ.
 .cm
 .cs 1 on
-.cm ¢|TAR EXEC¢%
+.cm Â¢|TAR EXECÂ¢%
 
  Use CMS TAR to store many files in an archive file on tape or disk.
- CMS TAR can read and write Unix 'tar' archives.
+ CMS TAR can read Unix 'tar' archives
+ and archives created with CMS TAR can be read by Unix 'tar'.
 .cs 1 off
 
 .cs 2 on
@@ -24,9 +25,9 @@
 .cs 2 off
 
 .cs 3 on
-¢|where:¢%
+Â¢|where:Â¢%
 
-¢|command¢%  is one of "c", "x", or "t", optionally with "v"
+Â¢|commandÂ¢%  is one of "c", "x", or "t", optionally with "v"
            and "f", "s", or 0..7, signifying:
 
            c : create a new archive
@@ -41,11 +42,11 @@
            01234567 : tape drive number, default is TAP1 (181)
            ("f", "s", and numerics are mutually exclusive)
 
-¢|compressors¢%  is one of "Z", "z", "j", or "J"
+Â¢|compressorsÂ¢%  is one of "Z", "z", "j", or "J"
 
  Note: compressors are external to CMS TAR.
 
-¢|tarfile¢% is the filename of the disk resident archive, having a filetype
+Â¢|tarfileÂ¢% is the filename of the disk resident archive, having a filetype
            of TAR, if F was specified in the command. This can also be the
            spoolid of the file when extracting a spool TAR file, or a target
            user@node when creating a spool TAR file.
@@ -56,13 +57,13 @@
 
                 tar tf thefile.cmstar
 
-¢|pattern¢%  specifies what files to tar/untar.
+Â¢|patternÂ¢%  specifies what files to tar/untar.
 
            CREATING AN ARCHIVE
            When creating an archive, this pattern must be specified
            in the form 'fn ft fm', like when using the LISTFILE command.
            In addition to '*' and '%', periods (.) can be used as wilcards
-           (like in Unix) so that if you specify simply '.' as the pattern,
+           (like in UNIX) so that if you specify simply '.' as the pattern,
            then all files on your 'A' disk will be archived. (curr directory)
            If the pattern omitted, only files specified with the INCLUDE option
            will be archived.
@@ -74,9 +75,9 @@
 .cs 3 off
 
 .cs 4 on
-¢|Options:¢%
+Â¢|Options:Â¢%
 
-¢|INCLUDE fn
+Â¢|INCLUDE fn
            specifies a FILELIST file listing files to be included in an
            archive being built. When creating an archive using an INCLUDE file,
            the name of each file as it will appear in the archive may follow
@@ -87,7 +88,7 @@
 .cs 4 off
 
 .cs 6 on
-¢|Return Codes:¢%
+Â¢|Return Codes:Â¢%
 
  Return codes are set by CMS Pipelines and other support programs.
 .cs 6 off
