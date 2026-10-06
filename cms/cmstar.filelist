@@ -1,8 +1,9 @@
-* Copyright © 2016, Richard M. Troth, all rights reserved.   <plaintext>
+* Copyright © 2016, 2025, 2026, Richard M. Troth, all rights reserved. <plaintext>
 *
 *         Name: CMSTAR FILELIST
-*         Date: 2016-Apr-21 (Thu)
+*         Date: 2016-Apr-21 (Thu), 2025-12-07 (Sun)
 *               This is the package definition for "CMS TAR".
+*      Version: 2.5.2
 *
       CMSTAR   FILELIST *  -- this file
       CMSTAR   README   *  -- do what the name says
@@ -11,24 +12,23 @@
 * CMS TAR:
       TAR      EXEC     *  -- the 'tar' command (wraps the pipeline)
       TAR      REXX     *  -- 'tar' as a CMS Pipelines stage
+      TAR      HELPCMS  *  -- brief help
       TARINDEX REXX     *  --
-      TARREADC REXX     *  --
-      TARPUNCH REXX     *  --
+      TARREADC REXX     *  -- reads from z/VM spool space
+      TARPUNCH REXX     *  -- sends to z/VM spool space
 *     TARTAPER REXX     *  --
 *     TARTAPEW REXX     *  --
       TARTAKE  REXX     *  --
-      CURL     REXX     *  -- web retrieval helper stage
 *
-*     RXVMGROUP MODULE  *  -- a vmgroup() function for REXX
-      RXVMGROUP ASSEMBLE * -- source to the vmgroup() function
-      VMGROUP  HELPREXX *  -- help file for the vmgroup() function
+      CURL     REXX     *  -- web retrieval helper stage (part of CMS Make)
+      CURL     EXEC     *  --
+      CURL     HELPCMS  *  --
 *
 * support stages for plaintext conversion
       A2E      REXX     *  --
       E2A      REXX     *  --
-      MAKETEXT REXX     *  --
-*
-      TAR      HELPCMS  *  -- brief help
+*     MAKETEXT REXX     *  --
+*     MAKETEXT HELPPIPE *  --
 *
 * TARLIST:
       TARLIST  EXEC     *  -- the 'tarlist' command
@@ -38,7 +38,19 @@
 *
 * supplemental
       CMSTAR   CMSMAKE  *  -- simple 'make' rules for [re]packaging these files
-* make -f cmstar rxvmgroup.module
 * make -f cmstar archives
+*
+      ISBINTYPE EXEC    *  -- function to indicate binary/non-print filetype
+      ISBINDATA EXEC    *  -- function to indicate binary/non-print data
+*
+*     RXVMGROUP MODULE  *  -- a vmgroup() function for REXX
+      RXVMGROUP ASSEMBLE * -- source to the vmgroup() function
+      VMGROUP  HELPREXX *  -- help file for the vmgroup() function
+* make -f cmstar rxvmgroup.module
+*
+*     CMSTAR   TODO     *  -- as the name says
+*     TARPRESS REXX     *  -- compression/deflation
+*     SAMPLE   TAR      *  --
+*     README   MD       *  -- Git only
 *
 *

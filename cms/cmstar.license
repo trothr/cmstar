@@ -1,4 +1,4 @@
-Copyright © 1994, 1995, 2016, Richard M. Troth, all rights reserved. <plaintext>                                                                                                                                                                               
+Copyright © 1994, 1995, 2016, 2025,Richard M. Troth, all rights reserved. <plaintext>                                                                                                                                                                          
 
  This software may be freely distributed provided that this notice
  and the code itself remain unchanged. The user may make any private
@@ -13,13 +13,13 @@ Copyright © 1994, 1995, 2016, Richard M. Troth, all rights reserved. <plaintext>
  University in Houston, Texas. Portions of this software were developed
  on the VM/ESA system at the University of Alabama in Tuscaloosa,
  Alabama. Portions of this software were developed on the z/VM system
- at Marist College in Poughkeepsie, New York. This software depends on
- other support programs, of which some are freely distributable,
+ at Marist University in Poughkeepsie, New York. This software depends
+ on other support programs, of which some are freely distributable,
  others proprietary and/or licensed.
 
  If you wish to support future development of this software,
  or use it in a for-profit distribution, contact the author:
 
-      Rick Troth <rmt@casita.net>
+      Rick Troth <rick@trothtech.us>
 
 

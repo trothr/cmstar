@@ -1,0 +1,107 @@
+/*
+ *
+ *        Name: ISBINTYPE EXEC
+ *              returns true (1) if the supplied filetype is binary
+ *      Author: Rick Troth, Cedarville, Ohio, USA
+ *        Date: 2025-12-07 (Sun)
+ *
+ *        NOTE: returns "?" if it cannot determine explicitly,
+ *              may return "V" if filetype is known for RECFM=V,
+ *              so is NOT completely safe for true/false work
+ *
+ */
+
+/* first be sure that we are invoked as a Rexx function               */
+Parse Upper Source . mode arg0 .
+If mode ^= "FUNCTION" Then Do
+    Address "COMMAND" 'XMITMSG 475 ARG0 (ERRMSG'
+    Address "COMMAND" 'XMITMSG 1304 ARG0 (ERRMSG'
+    Exit 24
+End
+
+Call _isbt_def
+
+/* second check if this filetype is listed explicitly text/binary     */
+Parse Upper Arg ft . , .
+Parse Upper Value Value(ft,,"GLOBAL FILETYPE") With tr nl .
+If tr = "YES" Then Return 0
+If tr = "NO" Then Return 1
+
+/* in the end look for this filetype VM TCP/IP configuration file     */
+Address "COMMAND" 'PIPE < TCPIP DATA' ,
+    '| XLATE UPPER | STRLOCATE 1.11 /VMFILETYPE / | STEM VMFT.'
+If rc ^= 0 Then Return "?"
+Do i = 1 to vmft.0
+    Parse Var vmft.i . ft "," .    ; ft = Strip(ft)
+    If ft = "MODULE" Then Iterate
+    If Value(ft,,"GLOBAL FILETYPE") ^= "" Then Iterate
+    Parse Var vmft.i . "TRANSLATE=" tr "," .
+    Parse Var vmft.i . "LINES=" nl "," .
+    Call Value ft, tr nl, "GLOBAL FILETYPE"
+End /* Do For */
+
+/* perform a second check on this particular filetype                 */
+Parse Upper Arg ft . , .                 /* ft was modified so reload */
+Parse Upper Value Value(ft,,"GLOBAL FILETYPE") With tr nl .
+If tr = "YES" Then Return 0
+If tr = "NO" Then Return 1
+
+/* some patterns for wildcarded filetypes                             */
+If Right(ft,3) = "BIN" Then Return 1  /* VMFILETYPE *BIN,TRANSLATE=NO */
+If Left(ft,3) = "OFS" Then Return 0  /* VMFILETYPE OFS*,TRANSLATE=YES */
+If Left(ft,4) = "HELP" Then Return 0
+If Left(ft,4) = "NOTE" Then Return 0
+
+Return "?"
+
+/* ----------------------------------------------------------- _DEFAULTS
+ *    establish some known filetypes (which might not be listed)
+ */
+_isbt_def: Procedure
+
+/* enumerate some known textual filetypes */
+i = 0
+i = i + 1 ; tt.i = "AUXVM"
+i = i + 1 ; tt.i = "CMSMAKE"
+i = i + 1 ; tt.i = "COPYRIGH"
+i = i + 1 ; tt.i = "FILELIST"
+i = i + 1 ; tt.i = "HISTORY"
+i = i + 1 ; tt.i = "LICENSE"
+i = i + 1 ; tt.i = "MD"
+i = i + 1 ; tt.i = "MESSAGES"
+i = i + 1 ; tt.i = "NETID"
+i = i + 1 ; tt.i = "PEM"
+i = i + 1 ; tt.i = "README"
+i = i + 1 ; tt.i = "S"
+i = i + 1 ; tt.i = "ZNETBOOT"
+tt.0 = i
+
+/* above listed filetypes are textual returning 0 for "is it binary?" */
+Do i = 1 to tt.0
+    If Value(tt.i,,"GLOBAL FILETYPE") = "" ,
+        Then Call Value tt.i, "YES" "NL", "GLOBAL FILETYPE"
+End /* Do For */
+
+/* enumerate some known binary filetypes */
+j = 0
+j = j + 1 ; bt.j = "CSLLIB"
+j = j + 1 ; bt.j = "GLOBALV"                               /* RECFM=V */
+j = j + 1 ; bt.j = "HELPLIB"
+j = j + 1 ; bt.j = "LOADLIB"
+j = j + 1 ; bt.j = "MACLIB"
+j = j + 1 ; bt.j = "MODULE"                                /* RECFM=V */
+j = j + 1 ; bt.j = "TAR"
+j = j + 1 ; bt.j = "TEXT"
+j = j + 1 ; bt.j = "TXTLIB"
+j = j + 1 ; bt.j = "VMARC"
+bt.0 = j
+
+/* above listed filetypes are binary returning 1 for "is it binary?"  */
+Do j = 1 to bt.0
+    If Value(bt.j,,"GLOBAL FILETYPE") = "" ,
+        Then Call Value bt.j, "NO" "NONE", "GLOBAL FILETYPE"
+End /* Do For */
+
+Return
+
+

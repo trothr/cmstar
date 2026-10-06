@@ -1,18 +1,21 @@
-/* © Copyright 1992, 1995, Richard M. Troth, all rights reserved.
- *              (casita sourced) <plaintext>
+/* © Copyright 1992, 1995, 2024, 2025, Richard M. Troth, all rights reserved. <plaintext>
  *
  *        Name: TAR REXX
  *              a from-scratch replacement for CMS 'tar' v1
  *      Author: Rick Troth, Houston, Texas, USA
  */
 
-vrm = "2.4.1"
+vrm = "2.5.2"
 Numeric Digits 16
 
 /* ASCII non-printables */
 a_nprint = '00010203040506'x
+a_nprint = '01020304060B0E0F10111213141718191A1C1D1E1F'x
 /* EBCDIC non-printables */
 e_nprint = '0001020304'x
+e_nprint = '0001020304060B0C0E0F10111213141718191A1B1C1D1E1F'x
+/* generic non-printables */
+x_nprint = '01020304060B0E0F10111213141718191A1C1D1E1F'x
 
 /* some defaults */
 tar.uid = 1
@@ -21,9 +24,10 @@ tar.gid = 1
 Parse Source . . . . . arg0 .
 argo = arg0 || ':'
 
-tc = ""     /*  primary operation  (tar command)  */
-tf = ""     /*  archive file  (tar file)  */
-td = ""     /*  archive device  (disk, tape, or SPOOL)  */
+tc = ""     /* primary operation (tar command) */
+tf = ""     /* archive file (tar file) */
+td = ""     /* archive device (disk, tape, or spool) */
+tn = ""     /* name applied to TAR-as-stream */
 
 verbose = 0
 modtime = 1
@@ -34,6 +38,7 @@ skip = 0
 peek = 0
 once = 0
 replace = 0
+append = 0
 
 /* parse command-line options */
 Parse Arg args "(" opts ")" .
@@ -43,93 +48,92 @@ Do While Left(arg1,2) = "--"
   Parse Var args . args
   Select
     When Abbrev("--version",arg1,5) Then Do
-/*    Say "CMS TAR - Version" vrm "(piped)"    */
-/*    Say "tar (CMS tar)" vrm    */
-      Say "CMS TAR" vrm "(piped)"
-      Exit
-    End
+        Say "CMS TAR" vrm "(piped)"
+        Exit 0 ; End
+    When Abbrev("--help",arg1,4) Then Do
+        Address "COMMAND" 'HELP CMS TAR'
+        Exit rc ; End
+    When Abbrev("--append",arg1,5)  Then append = 1
     Otherwise Do
       Address "COMMAND" 'XMITMSG 3 ARG1 (ERRMSG'
-      Exit 24
-    End
+      Exit 24 ; End
   End /* Select */
   Parse Var args arg1 .
-End
+End /* Do While */
 
 Parse Var args cmd args
 Upper cmd
 
 Do While cmd ^= ""
     Parse Var cmd 1 c 2 cmd
-    Select  /*  c  */
+    Select /* c */
         When c = '-' Then nop
         When c = 'C' Then Do
             If tc ^= "" Then Do
                 Address "COMMAND" 'XMITMSG 66 TC C (ERRMSG'
                 Say argo "multiple primary operations."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             tc = c
-            End  /*  When  Do  */
+        End /* When Do */
         When c = 'X' Then Do
             If tc ^= "" Then Do
+                Address "COMMAND" 'XMITMSG 66 TC C (ERRMSG'
                 Say argo "multiple primary operations."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             tc = c
-            End  /*  When  Do  */
+        End /* When Do */
         When c = 'T' Then Do
             If tc ^= "" Then Do
+                Address "COMMAND" 'XMITMSG 66 TC C (ERRMSG'
                 Say argo "multiple primary operations."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             tc = c
-            End  /*  When  Do  */
+        End /* When Do */
         When c = 'R' Then Do
             If tc ^= "" Then Do
+                Address "COMMAND" 'XMITMSG 66 TC C (ERRMSG'
                 Say argo "multiple primary operations."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             tc = c
-            End  /*  When  Do  */
+        End /* When Do */
         When c = 'F' Then Do
             If tf ^= "" Then Do
+                Address "COMMAND" 'XMITMSG 66 TF C (ERRMSG'
                 Say argo "multiple archives specified."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             Parse Var args tf args
             td = 'F'
-            End  /*  When  Do  */
+        End /* When Do */
         When c = 'S' Then Do
             If tf ^= "" Then Do
+                Address "COMMAND" 'XMITMSG 66 TF C (ERRMSG'
                 Say argo "multiple archives specified."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             Parse Var args tf args
             td = 'S'
-            End  /*  When  Do  */
+        End /* When Do */
         When c = '0' | c = '1' | c = '2' | c = '3' ,
              c = '4' | c = '5' | c = '6' | c = '7' Then Do
             If tf ^= "" Then Do
+                Address "COMMAND" 'XMITMSG 66 TF C (ERRMSG'
                 Say argo "multiple archives specified."
-                Exit 24
-                End  /*  If  ..  Do  */
+                Exit 24 ; End
             tf = "TAP" || c
             td = 'T'
-            End  /*  When  Do  */
+        End /* When Do */
         When c = 'V' Then Do
           verbose = 1
-          Say "CMS TAR - Version" vrm "(piped)"
-        End  /*  When  Do  */
+          Say "CMS TAR" vrm "(piped)"
+        End /* When Do */
         When c = 'M' Then modtime = 0
         When c = 'W' Then prompt = 1
         Otherwise Do
           Address "COMMAND" 'XMITMSG 3 C (ERRMSG'
           Say argo "unrecognized command token" c
           Exit 24
-        End  /*  Otherwise  Do  */
-        End  /*  Select  c  */
-    End
+        End /* Otherwise Do */
+    End /* Select c */
+End /* Do While */
 
 If tf = "" Then tf = "TAP1"
 If td = "" Then td = "T"
@@ -143,9 +147,13 @@ End
 If POS("://",tf) > 0 Then td = 'S'
 
 Do While opts ^= ""
-  Parse Var opts op opts
-  Upper op
+  Parse Var opts op opts ; Upper op
   Select /* op */
+    When Abbrev("VERSION",op,3)     Then Do
+        Say "CMS TAR" vrm "(piped)" ; Exit 0 ; End
+    When Abbrev("HELP",op,2)        Then Do
+        Address "COMMAND" 'HELP CMS TAR' ; Exit rc ; End
+    When Abbrev("APPEND",op,3)      Then append = 1
     When Abbrev("TARLIST",op,4)     Then tarlist = 1
     When Abbrev("NOTARLIST",op,3)   Then tarlist = 0
     When Abbrev("INCLUDE",op,3)     Then Parse Var opts include opts
@@ -160,6 +168,8 @@ Do While opts ^= ""
     When Abbrev("NOPROMPT",op,3)    Then prompt = 0
     When Abbrev("REPLACE",op,3)     Then replace = 1
     When Abbrev("NOREPLACE",op,3)   Then replace = 0
+    When Abbrev("APPEND",op,3)      Then append = 1
+    When Abbrev("NAMEIT",op,3)      Then Parse Var opts tn opts
     Otherwise Do
       Address "COMMAND" 'XMITMSG 3 OP (ERRMSG'
       Exit 24
@@ -167,48 +177,49 @@ Do While opts ^= ""
   End /* Select op */
 End /* Do While */
 
-Select  /*  tc  */
+Select /* tc */
 
     When tc = 'C' Then Do
-        Select  /*  td  */
+        Select /* td */
             When td = 'F' Then Do
                 If tf ^= "-" Then Do
                     Parse Var tf tfn '.' tft '.' tfm '.' .
                     If tft = "" Then tft = "TAR"
                     If tfm = "" Then tfm = "A"
-                    'ADDPIPE *.OUTPUT: | >' tfn tft tfm 'F 512'
-                    End  /*  If  ..  Do  */
+                    If append Then app = "APPEND" ; Else app = ""
+                    'ADDPIPE *.OUTPUT: | >' tfn tft tfm 'F 512' app
+                    End /* If .. Do */
                 Call CREATE
-                End  /*  When  ..  Do  */
+                End /* When .. Do */
             When td = 'T' Then Do
                 'ADDPIPE *.OUTPUT: | TAPE' tf
                 Call CREATE
-                End  /*  When  ..  Do  */
+                End /* When .. Do */
             When td = 'S' Then Do
-                'ADDPIPE *.OUTPUT: | TARPUNCH' tf
+                'ADDPIPE *.OUTPUT: | TARPUNCH' tf tn
                 Call CREATE
-                End  /*  When  ..  Do  */
+                End /* When .. Do */
             Otherwise Do
                 Say argo "internal error: unknown TAR target" td tf
-                End  /*  Otherwise  Do  */
-            End  /*  Select  td  */
-        End  /*  When  ..  Do  */
+                End /* Otherwise Do */
+            End /* Select td */
+        End /* When .. Do */
 
     When tc = 'X' Then Do
-        Select  /*  td  */
+        Select /* td */
             When td = 'F' Then Do
                 If tf ^= "-" Then Do
                     Parse Var tf tfn '.' tft '.' tfm '.' .
                     If tft = "" Then tft = "TAR"
                     'ADDPIPE <' tfn tft tfm '| *.INPUT:'
-                    End  /*  If  ..  Do  */
+                    End /* If .. Do */
                 Call XTRACT
-                End  /*  When  ..  Do  */
+                End /* When .. Do */
             When td = 'T' Then Do
-                'CALLPIPE CMS TAPE REW (' tf    /*  not quite right  */
+                'CALLPIPE CMS TAPE REW (' tf       /* not quite right */
                 'ADDPIPE TAPE' tf '| *.INPUT:'
                 Call XTRACT
-                'CALLPIPE CMS TAPE REW (' tf    /*  not quite right  */
+                'CALLPIPE CMS TAPE REW (' tf       /* not quite right */
                 End  /*  When  ..  Do  */
             When td = 'S' Then Do
                 'ADDPIPE TARREADC' tf '| *.INPUT:'
@@ -221,7 +232,7 @@ Select  /*  tc  */
         End  /*  When  ..  Do  */
 
     When tc = 'T' Then Do
-        Select  /*  td  */
+        Select /* td */
             When td = 'F' Then Do
                 If tf ^= "-" Then Do
                     Parse Var tf tfn '.' tft '.' tfm '.' .
@@ -243,13 +254,12 @@ Select  /*  tc  */
             Otherwise Do
                 Say argo "internal error: unknown TAR source" td tf
                 End  /*  Otherwise  Do  */
-            End  /*  Select  td  */
+            End /* Select td */
         End  /*  When  ..  Do  */
 
     End  /*  Select  tc  */
 
 Exit rc * (rc ^= 12)
-
 
 /* ---------------------------------------------------------------------
  *  create or update
@@ -281,7 +291,7 @@ Do Forever
 
     'CALLPIPE COMMAND LISTFILE' fn ft fm ,
         '(FULLDATE | DROP | VAR FILESPEC'
-    If rc /= 0 Then Iterate
+    If rc ^= 0 Then Iterate
 
     Parse Var filespec . . fmode recfm lrecl . . date time .
     fmode = Right(fmode,1)
@@ -298,18 +308,27 @@ Do Forever
 
     If recfm = 'V' Then lrecl = 0
 
-    'CALLPIPE <' fn ft fm '| TAKE FIRST 1 | VAR SAMPLE'
-    If Verify(sample,e_nprint,'M') = 0 Then trans = 't'
-                                       Else trans = 'b'
+    /* set trans flag based on binary (filetype or content)           */
+    isbin = isbintype(ft)                              /* added 2.5.2 */
+    Select /* isbin */                                 /* added 2.5.2 */
+        When isbin = 0 Then trans = 't'
+        When isbin = 1 Then trans = 'b'
+        Otherwise Do
+            'CALLPIPE <' fn ft fm '| TAKE FIRST 1 | VAR SAMPLE'
+            If Verify(sample,e_nprint,'M') = 0 Then trans = 't'
+                                               Else trans = 'b'
+        End /* Otherwise Do */
+    End /* Select isbin */                             /* added 2.5.2 */
 
-    Select
-        When trans = 't' Then
+    /* pick a pipe based on trans flag (set in previous stanza)       */
+    Select /* trans */
+        When trans = 't' Then ,
             pipe = '| STRIP TRAILING | E2A | SPEC 1-* 1 .0A. X2C NEXT'
-        When lrecl = 0 Then
+        When lrecl = 0 Then ,
             pipe = '| BLOCK 512 CMS'
-        Otherwise
+        Otherwise ,
             pipe = ""
-        End  /*  Select  */
+    End /* Select trans */
 
     'CALLPIPE <' fn ft fm pipe '| COUNT BYTES | VAR SIZE'
 
@@ -327,9 +346,8 @@ Do Forever
 
 Return
 
-
-/* ---------------------------------------------------------------------
- *  extract
+/* -------------------------------------------------------------- XTRACT
+ *    extract
  */
 XTRACT:
 
@@ -347,6 +365,7 @@ Do Forever
     If rc ^= 0 Then Leave
 
     'CALLPIPE *: | TAKE 1 | A2E | VAR RECORD'
+/* Say Space(Translate(record," ",'00'x))                             */
     Call EXTARENT
     If size = 0 & name = "" Then Leave
     If size = 0 Then Iterate
@@ -426,6 +445,8 @@ Do Forever
         Address "COMMAND" 'XEDIT TAR CMSUT1' fm
         Address "COMMAND" 'DROPBUF'
         End  /*  If  ..  Do  */
+    If type = "X" Then ,
+        Address "COMMAND" 'ERASE TAR CMSUT1' fm
     Else Do
         Address "COMMAND" 'RENAME TAR CMSUT1' fm filespec || fmode
         Address "COMMAND" 'DMSPLU' filespec date time
@@ -437,7 +458,6 @@ Do Forever
     End  /*  Do  Forever  */
 
 Return
-
 
 /* ---------------------------------------------------------------------
  *  list table of contents
@@ -452,7 +472,7 @@ LISTOC:
 If rc = 4 Then rc = 0
 If rc = 8 Then rc = 0
 If rc = 12 Then 'ADDPIPE *.OUTPUT: | CONSOLE'
-If rc /= 0 Then Exit rc
+If rc ^= 0 Then Exit rc
 
 Do Forever
 
@@ -460,13 +480,15 @@ Do Forever
     If rc ^= 0 Then Leave
 
     'CALLPIPE *: | TAKE 1 | A2E | VAR RECORD'
+/* Say Space(Translate(record," ",'00'x))                             */
     Call EXTARENT
     If size = 0 & name = "" Then Leave
     If POS("/",date) > 0 Then date = plu2std(date)
 
     If size > 0 Then Do
       Select
-        When tarlist  Then 'OUTPUT' "      " || Left(name,44) ,
+        When tarlist  Then If type ^= "X" ,
+                      Then 'OUTPUT' "      " || Left(name,44) ,
           Right(size,8) Right(date,10) Right(time,8) ,
           Right(skip,8) name /* trans recfm lrecl fmode */
         When verbose  Then 'OUTPUT' Left(name,42) '-' ,
@@ -486,7 +508,6 @@ Do Forever
 
 Return
 
-
 /* ------------------------------------------------------------ EXTARENT
  *  Extract TAR entry (directory info) values.
  *  Sets: size, and other variables.
@@ -498,6 +519,7 @@ Parse Upper Var record 101 perm . ,
                        125 size date chksum . trans lrecl fmode . ,
                        257 . ,
                        385 .
+Parse Upper Var record 157 type +1 .
 size = o2d(size)                /* convert to decimal */
 If size > 0 Then Do
     Parse Value sysdate(o2d(date)) With date time .
@@ -510,9 +532,10 @@ If size > 0 Then Do
 
 Return
 
-
-/* ------------------------------------------------------------------ */
-O2D:        Procedure   /*  Octal to Decimal conversion  */
+/* ----------------------------------------------------------------- O2D
+ *    Octal to Decimal conversion
+ */
+O2D:      Procedure     /* Octal to Decimal conversion */
 Parse Arg o
 d = 0
 Do While o ^= ""
@@ -521,9 +544,8 @@ Do While o ^= ""
     End  /*  Do  While  */
 Return d
 
-
 /* ------------------------------------------------------------------ */
-D2O:        Procedure   /*  Decimal to Octal conversion  */
+D2O:      Procedure     /* Decimal to Octal conversion */
 Parse Arg d
 /* Say "D2O:" d */
 If ^Datatype(d,'N') Then d = 0
@@ -535,7 +557,6 @@ Do While d ^= 0
     d = d % 8
     End  /*  Do While  */
 Return o
-
 
 /* ------------------------------------------------------------- TARDATE
  *  Convert local CMS time and date stamp to POSIX time value.
@@ -550,11 +571,10 @@ If POS("-",date) > 0 Then idfmt = "ISODATE"
 /* convert to POSIX for easier arithmetic */
 idate = date time
 'CALLPIPE VAR IDATE | DATECONVERT' idfmt 'POSIX | VAR PDATE'
-If rc /= 0 Then Return 0
+If rc ^= 0 Then Return 0
 
 /* return POSIX time value */
 Return C2D(pdate) /* - tzoffset("S") */
-
 
 /* ------------------------------------------------------------- SYSDATE
  *  Convert POSIX time in archive to local CMS time and date stamp.
@@ -569,8 +589,8 @@ zdate = D2C(base,8)
 
 /* convert back to FULLDATE and include time */
 'CALLPIPE VAR ZDATE | DATECONVERT POSIX FULLDATE TIMEOUT | VAR RS'
-If rc /= 0 Then Do
-  If rs /= "" & rs /= "RS" Then Say rs
+If rc ^= 0 Then Do
+  If rs ^= "" & rs ^= "RS" Then Say rs
   Return Date("S") Time()
 End
 
@@ -578,7 +598,6 @@ End
 Parse Var rs rd rt .
 Parse Var rt rt "." .
 Return rd rt
-
 
 /* ------------------------------------------------------------ MKTARENT
  *  Create a TAR entry (directory info) from values.
@@ -659,11 +678,6 @@ struct posix_header
 
  */
 
-
-
-
-
-
 /* ------------------------------------------------------------ TZOFFSET
  *  Compute timezone offset based on timezone string from 'CP Q TIME'.
  *  (we probably have a CSL routine to do this ... but maybe not)
@@ -704,10 +718,9 @@ Select /* denom */
   Otherwise Return zo
 End /* Select denom */
 
-
 /* ---------------------------------------------------------------------
  */
-plu2std: Procedure
+plu2std:  Procedure
 Parse Arg d . , .
 Parse Var d mon "/" day "/" year
 Return year || "-" || mon || "-" || day

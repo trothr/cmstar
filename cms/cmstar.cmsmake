@@ -1,10 +1,10 @@
 #
 #
 #         Name: CMSTAR CMSMAKE (package rules file for CMS TAR)
-#         Date: 2016-Apr-24 +/-
+#         Date: 2025-12-07, 2024-04-25, 2023-02-13, 2016-07-09
+#
 #               These rules let you re-package CMS TAR or even
 #               re-download it from the primary web site (BASEURL).
-#
 #
 #
 
@@ -12,28 +12,32 @@ MANIFEST        =       \
                         cmstar.filelist   \
                         cmstar.readme     \
                         cmstar.license    \
+                        \
                         tar.exec          \
                         tar.rexx          \
+                        tar.helpcms       \
                         tarindex.rexx     \
                         tarreadc.rexx     \
                         tarpunch.rexx     \
                         tartake.rexx      \
+                        curl.rexx         \
+                        curl.exec         \
+                        curl.helpcms      \
                         a2e.rexx          \
                         e2a.rexx          \
-                        maketext.rexx     \
-                        tar.helpcms       \
                         tarlist.exec      \
                         proftlst.xedit    \
                         executar.xedit    \
                         tarlist.helpcms   \
+                        isbintype.exec    \
+                        isbindata.exec    \
                         rxvmgroup.assemble \
                         vmgroup.helprexx  \
                         cmstar.cmsmake
 
 BASEURL         =       http://www.casita.net/pub/cmstar
 
-
-_default:  $(MANIFEST)
+_default:       $(MANIFEST)
 
 # create a Unix makefile (tabs) from the CMS TAR makefile
 makefile:  cmstar.cmsmake
@@ -56,6 +60,9 @@ tar.exec:
 tar.rexx:
         wget -q $(BASEURL)/$@
 
+tar.helpcms:
+        wget -q $(BASEURL)/$@
+
 tarindex.rexx:
         wget -q $(BASEURL)/$@
 
@@ -68,6 +75,21 @@ tarpunch.rexx:
 tartake.rexx:
         wget -q $(BASEURL)/$@
 
+curl.rexx:
+        wget -q $(BASEURL)/$@
+
+curl.exec:
+        wget -q $(BASEURL)/$@
+
+curl.helpcms:
+        wget -q $(BASEURL)/$@
+
+a2e.rexx:
+        wget -q $(BASEURL)/$@
+
+e2a.rexx:
+        wget -q $(BASEURL)/$@
+
 tarlist.exec:
         wget -q $(BASEURL)/$@
 
@@ -77,17 +99,28 @@ proftlst.xedit:
 executar.xedit:
         wget -q $(BASEURL)/$@
 
-rxvmgroup.helpcms:
-        wget -q $(BASEURL)/$@
-
-tar.helpcms:
-        wget -q $(BASEURL)/$@
-
 tarlist.helpcms:
         wget -q $(BASEURL)/$@
 
+isbintype.exec:
+        wget -q $(BASEURL)/$@
+
+isbindata.exec:
+        wget -q $(BASEURL)/$@
+
+#rxvmgroup.helpcms:
+#       wget -q $(BASEURL)/$@
+
 rxvmgroup.assemble:
         wget -q $(BASEURL)/$@
+
+vmgroup.helprexx:
+        wget -q $(BASEURL)/$@
+
+cmstar.cmsmake:
+        wget -q $(BASEURL)/$@
+
+### reproducible executables ###
 
 rxvmgroup.module:  rxvmgroup.assemble
         @copyfile rxvmgroup assemble a = = = ( olddate replace recfm f lrecl 80
@@ -101,21 +134,26 @@ rxvmgroup.module:  rxvmgroup.assemble
 
 ### package files ###
 
-cmstar.vmarc:  $(MANIFEST) rxvmgroup.module
+archives:       cmstar.vmarc cmstar.tar
+
+cmstar.vmarc:   $(MANIFEST)
         @rm -f cmstar.vmarc
         @cms ' pipe < cmstar filelist \
-                | nlocate 1.1 /*/ \
+                | strip | nlocate 1.1 /*/ \
                 | spec /vmarc pack/ nw w 1 nw w 2 nw /a/ nw \
-                    /cmstar vmarc a ( append/ nw \
+                    /cmstar vmarc a (append/ nw \
                 | cms | console '
-        @VMARC PACK RXVMGROUP MODULE  * CMSTAR VMARC A ( APPEND
+#       @VMARC PACK RXVMGROUP MODULE * CMSTAR VMARC A (APPEND
 
 cmstar.vmarcuue:  cmstar.vmarc
         uuencode -m $< < $< > $@
 
-cmstar.tar:
+cmstar.tar:     $(MANIFEST)
         @rm -f cmstar.tar
-        tar cf cmstar ( include cmstar
+        tar cvf cmstar (include cmstar
+
+cmstar.now:     $(MANIFEST)
+        tar cvs rmt@bit.casita.net (include cmstar name cmstar.tar
 
 cmstar.taruue:  cmstar.tar
         uuencode -m $< < $< > $@
